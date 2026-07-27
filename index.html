@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>AutoRelleno – Term Bill Pierce College</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { overscroll-behavior: none; }
+    input[type="date"] { color-scheme: dark; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-700">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center font-bold text-white text-sm">AR</div>
+      <div>
+        <h1 class="text-base font-semibold leading-tight">Term Bill AutoRelleno</h1>
+        <p class="text-xs text-slate-400">Pierce College-Puyallup · Spring 2026</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 py-5 space-y-5 pb-28">
+
+    <!-- Vista previa del formulario -->
+    <div class="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700">
+      <div class="px-4 py-2 bg-slate-700/50 text-xs text-slate-300 flex justify-between items-center">
+        <span>Formulario en blanco</span>
+        <button onclick="document.getElementById('custom-image').click()" class="text-brand-500 font-medium text-xs">Cambiar foto</button>
+      </div>
+      <img id="preview-blank" src="/static/images/term_bill_blank.jpg" 
+           class="w-full h-auto max-h-52 object-contain bg-black" alt="Term Bill" />
+      <input type="file" id="custom-image" accept="image/*" capture="environment" class="hidden" />
+    </div>
+
+    <!-- Datos del estudiante -->
+    <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700 space-y-4">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wide">Datos del estudiante</h2>
+
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Nombre completo (Student)</label>
+        <input id="student" type="text" placeholder="Ej: Ana María López García"
+               class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+               autocomplete="name" />
+      </div>
+
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Student ID</label>
+        <div class="flex gap-2">
+          <input id="student_id" type="text" placeholder="Ej: 2026847392"
+                 class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          <button type="button" onclick="randomizeId()" 
+                  class="px-4 rounded-xl bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-sm font-medium whitespace-nowrap">
+            🎲 Aleatorio
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fecha principal + auto-cálculo -->
+    <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700 space-y-4">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wide">Fecha principal</h2>
+      <p class="text-xs text-slate-400 -mt-2">Elige la fecha más importante. Las demás se calculan automáticamente (hasta ene 2027).</p>
+
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Statement Date (fecha base)</label>
+        <input id="base_date" type="date" min="2025-01-01" max="2027-01-31"
+               class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+               onchange="recalculateDates()" />
+      </div>
+
+      <!-- Campos calculados -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <div>
+          <label class="block text-[11px] text-slate-500 mb-0.5">Term</label>
+          <input id="term" type="text" readonly
+                 class="w-full bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-500 mb-0.5">Statement Date</label>
+          <input id="statement_date" type="text" readonly
+                 class="w-full bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-500 mb-0.5">Payment Due</label>
+          <input id="payment_due" type="text" readonly
+                 class="w-full bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-500 mb-0.5">Expected Graduation</label>
+          <input id="expected_graduation" type="text" readonly
+                 class="w-full bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300" />
+        </div>
+        <div class="col-span-2">
+          <label class="block text-[11px] text-slate-500 mb-0.5">Fecha debajo de PROCESSED</label>
+          <input id="processed_date" type="text" readonly
+                 class="w-full bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Botón generar -->
+    <button id="btn-generate" onclick="generate()"
+            class="w-full bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-semibold py-4 rounded-2xl text-base shadow-lg shadow-brand-900/30 transition">
+      Generar documento rellenado
+    </button>
+
+    <!-- Resultado -->
+    <section id="result" class="hidden space-y-3">
+      <div class="bg-slate-800 rounded-2xl overflow-hidden border border-emerald-600/40">
+        <div class="px-4 py-2 bg-emerald-900/30 text-xs text-emerald-300 font-medium">✓ Documento generado</div>
+        <img id="result-img" class="w-full h-auto" alt="Resultado" />
+      </div>
+      <a id="download-btn" download="TermBill_Rellenado.jpg"
+         class="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-2xl">
+        ⬇ Descargar imagen
+      </a>
+    </section>
+
+  </main>
+
+  <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-700 text-white text-sm px-5 py-3 rounded-full shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
